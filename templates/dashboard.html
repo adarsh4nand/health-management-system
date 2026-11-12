@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HealthTrack</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#00f3ff">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">🌿 HealthTrack</div>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 15px;">
+        {% if streak > 0 %}
+        <span class="streak-badge">🔥 {{ streak }} Day Streak!</span>
+        {% endif %}
+        <span style="color: var(--text-muted);">Welcome, <b style="color: var(--neon-cyan);">{{ username }}</b></span>
+        
+        <!-- NEW NAVIGATION LINKS -->
+        <a href="/resources" class="btn-logout" style="background:transparent; border:1px solid var(--neon-green); color:var(--neon-green);">🏥 Resources</a>
+        <a href="/awareness" class="btn-logout" style="background:transparent; border:1px solid var(--neon-magenta); color:var(--neon-magenta);">🧠 Awareness</a>
+        
+        <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    
+    <!-- COMMUNITY IMPACT BANNER -->
+    {% if community and community.total_users > 0 %}
+    <div class="card community-banner">
+        <h3>🌍 Community Impact Dashboard</h3>
+        <p><b style="color: var(--neon-green);">{{ community.total_users }}</b> active users tracking their health. 
+        Community Average: <b style="color: var(--neon-cyan);">{{ community.avg_water }}</b> glasses of water & 
+        <b style="color: var(--neon-magenta);">{{ community.avg_sleep }}</b> hours of sleep.</p>
+    </div>
+    {% endif %}
+
+    <div class="card ai-tip-card">
+        <h3>🤖 AI Personalized Wellness Analysis</h3>
+        <p>{{ tip }}</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">💧</div>
+            <div class="stat-info"><h3 class="counter" data-target="{{ water_goal }}">{{ water_goal }}</h3><p>Glasses (Dynamic Goal)</p></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">😴</div>
+            <div class="stat-info"><h3 class="counter" data-target="8">8</h3><p>Hours (Goal)</p></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏃</div>
+            <div class="stat-info"><h3 class="counter" data-target="30">30</h3><p>Mins (Goal)</p></div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="card">
+            <h3>📝 Log Today's Habits</h3>
+            <form method="POST">
+                <div class="form-group">
+                    <label>⚖️ Your Weight (kg) - *For Dynamic Water Goal</label>
+                    <input type="number" name="weight" class="form-control" min="0" max="300" placeholder="e.g., 70" value="{{ request.form.get('weight', '') }}">
+                </div>
+                <div class="form-group">
+                    <label>💧 Water Intake (Glasses)</label>
+                    <input type="number" name="water" class="form-control" min="0" max="20" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label>😴 Sleep (Hours)</label>
+                    <input type="number" name="sleep" class="form-control" min="0" max="24" step="0.5" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label>🏃 Exercise (Minutes)</label>
+                    <input type="number" name="exercise" class="form-control" min="0" value="0" required>
+                </div>
+                <button type="submit" class="btn-primary">Save & Analyze</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>📊 Weekly Progress</h3>
+            <div class="chart-container">
+                <canvas id="habitChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {% if videos %}
+    <div class="card" style="margin-top: 2rem;">
+        <h3>📺 AI-Recommended Educational Resources</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Based on your logged data, our AI suggests these videos to help you improve.</p>
+        <div class="video-grid">
+            {% for video in videos %}
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <!-- Added ?rel=0 to prevent random videos from showing at the end -->
+                    <iframe src="https://www.youtube.com/embed/{{ video.id }}?rel=0&modestbranding=1" title="{{ video.title }}" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                    <h4>{{ video.title }}</h4>
+                    <!-- Fallback Button: If the iframe is blocked, this button saves the demo! -->
+                    <a href="https://www.youtube.com/watch?v={{ video.id }}" target="_blank" class="btn-export" style="margin-top: 10px; display: inline-block; font-size: 0.8rem; text-decoration: none;">
+                        ▶️ Watch on YouTube
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-top: 2rem; border-color: var(--neon-green);">
+        <h3 style="color: var(--neon-green);">📧 Automated Wellness Reminders</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Opt-in to receive daily proactive health tips and logging reminders.</p>
+        <form action="/subscribe" method="POST" style="display: flex; gap: 10px; max-width: 500px;">
+            <input type="email" name="email" class="form-control" placeholder="Enter your email address" required style="flex: 1;">
+            <button type="submit" class="btn-primary" style="width: auto; padding: 10px 20px;">Subscribe</button>
+        </form>
+    </div>
+
+    <!-- HISTORICAL DATA & EXPORT -->
+    <div class="card" style="margin-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0;">📅 Historical Data Log</h3>
+            <a href="/export_data" class="btn-export">📥 Export My Data (CSV)</a>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Your complete wellness tracking history. Analyze your long-term progress.</p>
+
+        {% if history %}
+        <div style="overflow-x: auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>💧 Water</th>
+                        <th>😴 Sleep</th>
+                        <th>🏃 Exercise</th>
+                        <th>🤖 AI Wellness Score (1-10)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in history %}
+                    <tr>
+                        <td>{{ row.last_updated }}</td>
+                        <td>{{ row.water_glasses }} glasses</td>
+                        <td>{{ row.sleep_hours }} hrs</td>
+                        <td>{{ row.exercise_mins }} mins</td>
+                        <td>{{ row.mood_rating }}/10</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No historical data found. Start logging your habits above!</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    // 1. Chart.js Configuration
+    fetch('/api/habit_data')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('habitChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.dates,
+                    datasets: [
+                        {
+                            label: 'Water (Glasses)',
+                            data: data.water,
+                            backgroundColor: '#00f3ff',
+                            borderColor: '#00f3ff',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Sleep (Hours)',
+                            data: data.sleep,
+                            backgroundColor: '#bc13fe',
+                            borderColor: '#bc13fe',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { color: '#e0e6ed', font: { family: 'Rajdhani', size: 14 } } } 
+                    },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8b9bb4', font: { family: 'Fira Code' } } },
+                        x: { grid: { display: false }, ticks: { color: '#8b9bb4', font: { family: 'Fira Code' } } }
+                    }
+                }
+            });
+        });
+
+    // 2. Animated Number Counters
+    document.querySelectorAll('.counter').forEach(counter => {
+        const target = +counter.getAttribute('data-target');
+        let count = 0;
+        const updateCount = () => {
+            const increment = target / 40;
+            if(count < target) {
+                count += increment;
+                counter.innerText = Math.ceil(count);
+                setTimeout(updateCount, 20);
+            } else {
+                counter.innerText = target;
+            }
+        };
+        updateCount();
+    });
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(reg => console.log('SW Registered!', reg))
+                .catch(err => console.log('SW Failed', err));
+        });
+    }
+</script>
+
+</body>
+</html>

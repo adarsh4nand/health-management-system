@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Health Awareness - HealthTrack</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">🌿 HealthTrack</div>
+        <div class="user-profile">
+            <a href="/dashboard" class="btn-logout" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan);">Dashboard</a>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>🧠 Myth vs. Fact: Health Awareness Feed</h3>
+            <p style="color: var(--text-muted);">Busting common health myths to build a healthier, more informed community.</p>
+        </div>
+
+        <div class="video-grid">
+            {% for item in myths %}
+            <div class="video-card">
+                <div style="padding: 1.5rem;">
+                    <div style="color: #ff4757; font-weight: bold; font-family: 'Orbitron'; margin-bottom: 0.5rem;">❌ MYTH</div>
+                    <p style="color: white; margin-bottom: 1.5rem; font-size: 1.1rem;">{{ item.myth }}</p>
+                    
+                    <div style="color: var(--neon-green); font-weight: bold; font-family: 'Orbitron'; margin-bottom: 0.5rem;">✅ FACT</div>
+                    <p style="color: var(--text-muted);">{{ item.fact }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

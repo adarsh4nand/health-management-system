@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Community Resources - HealthTrack</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">🌿 HealthTrack</div>
+        <div class="user-profile">
+            <a href="/dashboard" class="btn-logout" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan);">Dashboard</a>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>🏥 Local Health Resource Directory</h3>
+            <p style="color: var(--text-muted);">Connecting our community with free and affordable local health services.</p>
+        </div>
+
+        <div class="video-grid"> <!-- Reusing video-grid class for consistent card layout -->
+            {% for res in resources %}
+            <div class="video-card" style="border-color: var(--neon-green);">
+                <div style="padding: 2rem; text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">{{ res.icon }}</div>
+                    <h4 style="color: var(--neon-cyan); margin-bottom: 0.5rem;">{{ res.name }}</h4>
+                    <p style="color: var(--neon-green); font-family: 'Fira Code', monospace; font-size: 0.9rem;">{{ res.type }}</p>
+                    <p style="color: white; margin-top: 1rem;">{{ res.contact }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
