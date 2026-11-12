@@ -9,8 +9,12 @@ from ml_tips import get_personalized_tip
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_super_secret_key_123')
 
-# --- SQLITE DATABASE SETUP ---
-DB_NAME = 'health_awareness.db'
+# --- SQLITE DATABASE SETUP (VERCEL COMPATIBLE) ---
+# Vercel's file system is read-only except for the /tmp directory
+if os.environ.get('VERCEL') or (os.name == 'posix' and os.path.exists('/tmp')):
+    DB_NAME = '/tmp/health_awareness.db'
+else:
+    DB_NAME = 'health_awareness.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
