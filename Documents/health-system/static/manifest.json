@@ -1,0 +1,15 @@
+{
+  "name": "HealthTrack Wellness System",
+  "short_name": "HealthTrack",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0e17",
+  "theme_color": "#00f3ff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
